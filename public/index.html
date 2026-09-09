@@ -1,14 +1,4 @@
-<!DOCTYPE html>
-<html lang="pt-BR">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="theme-color" content="#111b21">
-    <link rel="manifest" href="/manifest.json">
-    <title>Chat Guilda WhatsApp Style</title>
-    <style>
+<style>
         :root {
             --wa-bg: #0b141a;
             --wa-panel: #111b21;
@@ -29,7 +19,6 @@
             font-family: 'Segoe UI', Helvetica, Arial, sans-serif;
         }
 
-        /* Bloqueia rolagem indesejada do body e fixa no tamanho real da tela (dvh) */
         body {
             background-color: var(--wa-bg);
             color: var(--wa-text);
@@ -155,12 +144,13 @@
             border-bottom: 2px solid var(--wa-green);
         }
 
+        /* CORREÇÃO PRINCIPAL: Força o painel a se conter sem vazar quando o teclado abrir */
         .chat-panel {
             flex: 1;
             display: none;
             flex-direction: column;
-            overflow: hidden;
-            min-height: 0; /* Essencial para flexbox não estourar com teclado mobile */
+            height: 0; /* Força o flexbox a recalcular o espaço disponível exato */
+            min-height: 0;
         }
 
         .chat-panel.active {
@@ -178,6 +168,7 @@
             background-color: #0b141a;
             background-image: radial-gradient(rgba(255,255,255,0.03) 1px, transparent 0);
             background-size: 24px 24px;
+            min-height: 0; /* Impede que o conteúdo interno empurre o formulário para fora */
         }
 
         .messages-list::-webkit-scrollbar {
@@ -262,7 +253,6 @@
             transform: translateX(1px);
         }
 
-        /* Novo Pop-up Estilizado (Modo Vidro/Neon) */
         #popupOverlay {
             position: absolute;
             top: 0; left: 0; width: 100%; height: 100%;
@@ -321,189 +311,4 @@
             text-align: left;
         }
 
-        .popup-close-btn {
-            background: linear-gradient(135deg, #8b5cf6, #7c3aed);
-            color: white;
-            border: none;
-            padding: 12px 20px;
-            border-radius: 12px;
-            font-weight: 600;
-            font-size: 1rem;
-            cursor: pointer;
-            width: 100%;
-            box-shadow: 0 4px 12px rgba(139, 92, 246, 0.4);
-            transition: transform 0.1s ease;
-        }
-
-        .popup-close-btn:active {
-            transform: scale(0.96);
-        }
-
-        @keyframes popIn {
-            from { transform: scale(0.8); opacity: 0; }
-            to { transform: scale(1); opacity: 1; }
-        }
-    </style>
-</head>
-<body>
-    <div class="chat-container">
-        <div class="chat-header">
-            <div class="header-left">
-                <div class="chat-avatar">⚔️</div>
-                <div class="chat-info">
-                    <h2>Guild Chat</h2>
-                    <span><div class="online-dot"></div> <span id="onlineCount">1</span> online</span>
-                </div>
-            </div>
-            <button id="toggleAlerts" class="alert-toggle-btn active" onclick="togglePopupSetting()">Pop-up: ON</button>
-        </div>
-
-        <div class="tabs-bar">
-            <button class="tab-btn active" onclick="switchTab('general')">💬 Chat Geral</button>
-            <button class="tab-btn" onclick="switchTab('guild')">🔥 Avisos de Quest</button>
-        </div>
-
-        <div id="generalPanel" class="chat-panel active">
-            <ul id="messagesGeneral" class="messages-list"></ul>
-            <form id="formGeneral" class="chat-form">
-                <input id="inputNameGen" class="input-name" placeholder="Nome" required autocomplete="off" />
-                <input id="inputMsgGen" class="input-msg" placeholder="Conversar no geral..." required autocomplete="off" />
-                <button class="send-btn" title="Enviar"><svg viewBox="0 0 24 24"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"></path></svg></button>
-            </form>
-        </div>
-
-        <div id="guildPanel" class="chat-panel">
-            <ul id="messagesGuild" class="messages-list"></ul>
-            <form id="formGuild" class="chat-form">
-                <input id="inputNameGuild" class="input-name" placeholder="Líder/Cargo" required autocomplete="off" />
-                <input id="inputMsgGuild" class="input-msg" placeholder="Mandar convocação..." required autocomplete="off" />
-                <button class="send-btn guild-send" title="Enviar Alerta"><svg viewBox="0 0 24 24"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"></path></svg></button>
-            </form>
-        </div>
-
-        <div id="popupOverlay">
-            <div class="popup-box">
-                <div class="popup-icon-badge">⚔️</div>
-                <h3>CONVOCAÇÃO DE QUEST</h3>
-                <p id="popupText">A guilda vai puxar agora!</p>
-                <button class="popup-close-btn" onclick="closePopup()">Entendido / Fechar</button>
-            </div>
-        </div>
-    </div>
-
-    <script src="/socket.io/socket.io.js"></script>
-    <script>
-        const socket = io();
-        const onlineCount = document.getElementById('onlineCount');
-        
-        let popupsEnabled = true;
-
-        // Pede permissão para notificações nativas do celular ao carregar
-        if ('Notification' in window && Notification.permission !== 'granted') {
-            Notification.requestPermission();
-        }
-
-        function togglePopupSetting() {
-            popupsEnabled = !popupsEnabled;
-            const btn = document.getElementById('toggleAlerts');
-            if (popupsEnabled) {
-                btn.textContent = "Pop-up: ON";
-                btn.classList.add('active');
-            } else {
-                btn.textContent = "Pop-up: OFF";
-                btn.classList.remove('active');
-            }
-        }
-
-        function switchTab(tab) {
-            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-            document.querySelectorAll('.chat-panel').forEach(p => p.classList.remove('active'));
-
-            if (tab === 'general') {
-                document.querySelectorAll('.tab-btn')[0].classList.add('active');
-                document.getElementById('generalPanel').classList.add('active');
-            } else {
-                document.querySelectorAll('.tab-btn')[1].classList.add('active');
-                document.getElementById('guildPanel').classList.add('active');
-            }
-        }
-
-        socket.on('stats', (data) => {
-            onlineCount.textContent = data.activeUsers;
-        });
-
-        const formGeneral = document.getElementById('formGeneral');
-        formGeneral.addEventListener('submit', (e) => {
-            e.preventDefault();
-            const msg = document.getElementById('inputMsgGen').value;
-            const name = document.getElementById('inputNameGen').value;
-            if (msg && name) {
-                socket.emit('chat message', { type: 'general', name, message: msg });
-                document.getElementById('inputMsgGen').value = '';
-            }
-        });
-
-        const formGuild = document.getElementById('formGuild');
-        formGuild.addEventListener('submit', (e) => {
-            e.preventDefault();
-            const msg = document.getElementById('inputMsgGuild').value;
-            const name = document.getElementById('inputNameGuild').value;
-            if (msg && name) {
-                socket.emit('guild alert', { name, message: msg });
-                document.getElementById('inputMsgGuild').value = '';
-            }
-        });
-
-        socket.on('chat message', (data) => {
-            const list = document.getElementById('messagesGeneral');
-            const item = document.createElement('li');
-            item.innerHTML = `<span class="msg-name">${data.name}</span>${data.message}`;
-            list.appendChild(item);
-            list.scrollTop = list.scrollHeight;
-        });
-
-        socket.on('guild alert', (data) => {
-            const list = document.getElementById('messagesGuild');
-            const item = document.createElement('li');
-            item.innerHTML = `<span class="msg-name" style="color: #c084fc;">[QUEST] ${data.name}</span>${data.message}`;
-            list.appendChild(item);
-            list.scrollTop = list.scrollHeight;
-
-            // Exibe o pop-up visual bonito dentro do app
-            if (popupsEnabled) {
-                document.getElementById('popupText').textContent = `${data.name}: ${data.message}`;
-                document.getElementById('popupOverlay').style.display = 'flex';
-            }
-
-            // Dispara Notificação Nativa do Celular (mesmo se o app estiver minimizado)
-            if ('Notification' in window && Notification.permission === 'granted') {
-                try {
-                    navigator.serviceWorker.ready.then(registration => {
-                        registration.showNotification("⚔️ Convocação de Quest!", {
-                            body: `${data.name}: ${data.message}`,
-                            icon: 'https://cdn-icons-png.flaticon.com/512/733/733585.png',
-                            badge: 'https://cdn-icons-png.flaticon.com/512/733/733585.png',
-                            vibrate: [200, 100, 200]
-                        });
-                    });
-                } catch (e) {
-                    // Fallback básico caso o service worker precise de contexto direto
-                    new Notification("⚔️ Convocação de Quest!", {
-                        body: `${data.name}: ${data.message}`
-                    });
-                }
-            }
-        });
-
-        function closePopup() {
-            document.getElementById('popupOverlay').style.display = 'none';
-        }
-
-        if ('serviceWorker' in navigator) {
-            window.addEventListener('load', () => {
-                navigator.serviceWorker.register('/sw.js').catch(err => console.log(err));
-            });
-        }
-    </script>
-</body>
-</html>
+... (mantenha o restante do código HTML e JavaScript do arquivo igualzinho)
