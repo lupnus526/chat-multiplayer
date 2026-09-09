@@ -1,0 +1,4 @@
+admin:123456:admin
+alexandre:minhasenha:admin
+membro1:senha123:membro
+membro2:senha123:membro
