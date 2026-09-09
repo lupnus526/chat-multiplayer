@@ -1,0 +1,15 @@
+{
+  "name": "Chat Multiplayer WhatsApp",
+  "short_name": "ChatMulti",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#0b141a",
+  "theme_color": "#111b21",
+  "icons": [
+    {
+      "src": "https://cdn-icons-png.flaticon.com/512/733/733585.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
