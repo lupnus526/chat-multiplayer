@@ -1,60 +1,178 @@
-<!DOCTYPE html>
-<html lang="pt-BR">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Chat Multiplayer Node.js</title>
-    <style>
-        body { font-family: Arial, sans-serif; background: #f0f2f5; margin: 0; padding: 20px; display: flex; justify-content: center; }
-        .chat-container { width: 100%; max-width: 600px; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
-        #messages { list-style-type: none; padding: 0; height: 350px; overflow-y: scroll; border-bottom: 1px solid #ddd; margin-bottom: 10px; }
-        #messages li { padding: 8px 12px; margin-bottom: 8px; background: #e1ffc7; border-radius: 4px; word-break: break-all; }
-        #form { display: flex; gap: 10px; }
-        #inputName { width: 30%; padding: 10px; border: 1px solid #ccc; border-radius: 4px; }
-        #inputMessage { flex: 1; padding: 10px; border: 1px solid #ccc; border-radius: 4px; }
-        button { background: #007bff; color: white; border: none; padding: 10px 15px; border-radius: 4px; cursor: pointer; }
-        button:hover { background: #0056b3; }
-    </style>
-</head>
-<body>
-    <div class="chat-container">
-        <h2>Chat Multiplayer</h2>
-        <ul id="messages"></ul>
-        <form id="form">
-            <input id="inputName" placeholder="Seu nome" required autocomplete="off" />
-            <input id="inputMessage" placeholder="Digite sua mensagem..." required autocomplete="off" />
-            <button>Enviar</button>
-        </form>
-    </div>
+<style>
+    :root {
+        --bg-gradient: linear-gradient(135deg, #0f172a 0%, #1e1b4b 50%, #311042 100%);
+        --glass-bg: rgba(255, 255, 255, 0.05);
+        --glass-border: rgba(255, 255, 255, 0.1);
+        --primary-glow: #8b5cf6;
+        --secondary-glow: #ec4899;
+        --text-main: #f8fafc;
+        --text-muted: #94a3b8;
+    }
 
-    <!-- Script do Socket.io do cliente -->
-    <script src="/socket.io/socket.io.js"></script>
-    <script>
-        const socket = io();
+    * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+    }
 
-        const form = document.getElementById('form');
-        const inputName = document.getElementById('inputName');
-        const inputMessage = document.getElementById('inputMessage');
-        const messages = document.getElementById('messages');
+    body {
+        font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+        background: var(--bg-gradient);
+        background-attachment: fixed;
+        color: var(--text-main);
+        height: 100vh;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        overflow: hidden;
+    }
 
-        form.addEventListener('submit', (e) => {
-            e.preventDefault();
-            if (inputMessage.value && inputName.value) {
-                const data = {
-                    name: inputName.value,
-                    message: inputMessage.value
-                };
-                socket.emit('chat message', data);
-                inputMessage.value = '';
-            }
-        });
+    .chat-container {
+        width: 100%;
+        max-width: 650px;
+        height: 85vh;
+        background: var(--glass-bg);
+        backdrop-filter: blur(16px);
+        -webkit-backdrop-filter: blur(16px);
+        border: 1px solid var(--glass-border);
+        border-radius: 20px;
+        box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(255, 255, 255, 0.05) inset;
+        display: flex;
+        flex-direction: column;
+        overflow: hidden;
+        animation: fadeIn 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+    }
 
-        socket.on('chat message', (data) => {
-            const item = document.createElement('li');
-            item.textContent = `${data.name}: ${data.message}`;
-            messages.appendChild(item);
-            messages.scrollTop = messages.scrollHeight; // Rolar para a última mensagem
-        });
-    </script>
-</body>
-</html>
+    .chat-header {
+        padding: 20px 24px;
+        border-bottom: 1px solid var(--glass-border);
+        background: rgba(255, 255, 255, 0.02);
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+    }
+
+    .chat-header h2 {
+        font-size: 1.25rem;
+        font-weight: 600;
+        letter-spacing: 0.5px;
+        background: linear-gradient(90deg, #c084fc, #f472b6);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+    }
+
+    .status-indicator {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-size: 0.85rem;
+        color: var(--text-muted);
+    }
+
+    .status-dot {
+        width: 8px;
+        height: 8px;
+        background-color: #22c55e;
+        border-radius: 50%;
+        box-shadow: 0 0 10px #22c55e;
+    }
+
+    #messages {
+        flex: 1;
+        list-style-type: none;
+        padding: 20px;
+        overflow-y: auto;
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+        scroll-behavior: smooth;
+    }
+
+    #messages::-webkit-scrollbar {
+        width: 6px;
+    }
+    #messages::-webkit-scrollbar-thumb {
+        background: rgba(255, 255, 255, 0.1);
+        border-radius: 10px;
+    }
+
+    #messages li {
+        padding: 12px 16px;
+        background: rgba(255, 255, 255, 0.07);
+        border: 1px solid rgba(255, 255, 255, 0.05);
+        border-radius: 12px;
+        max-width: 80%;
+        word-break: break-word;
+        animation: slideUp 0.3s ease-out;
+        font-size: 0.95rem;
+        line-height: 1.4;
+    }
+
+    #form {
+        padding: 20px;
+        background: rgba(0, 0, 0, 0.2);
+        border-top: 1px solid var(--glass-border);
+        display: flex;
+        gap: 12px;
+    }
+
+    input {
+        background: rgba(255, 255, 255, 0.05);
+        border: 1px solid var(--glass-border);
+        border-radius: 10px;
+        padding: 12px 16px;
+        color: white;
+        font-size: 0.95rem;
+        outline: none;
+        transition: all 0.3s ease;
+    }
+
+    input:focus {
+        border-color: var(--primary-glow);
+        box-shadow: 0 0 15px rgba(139, 92, 246, 0.3);
+        background: rgba(255, 255, 255, 0.08);
+    }
+
+    input::placeholder {
+        color: var(--text-muted);
+    }
+
+    #inputName {
+        width: 130px;
+    }
+
+    #inputMessage {
+        flex: 1;
+    }
+
+    button {
+        background: linear-gradient(135deg, var(--primary-glow), var(--secondary-glow));
+        color: white;
+        border: none;
+        padding: 0 24px;
+        border-radius: 10px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+        box-shadow: 0 4px 15px rgba(139, 92, 246, 0.4);
+    }
+
+    button:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(236, 72, 153, 0.5);
+    }
+
+    button:active {
+        transform: translateY(0);
+    }
+
+    @keyframes fadeIn {
+        from { opacity: 0; transform: scale(0.95); }
+        to { opacity: 1; transform: scale(1); }
+    }
+
+    @keyframes slideUp {
+        from { opacity: 0; transform: translateY(15px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+</style>
