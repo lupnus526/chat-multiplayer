@@ -7,7 +7,7 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="theme-color" content="#0b141a">
     <link rel="manifest" href="/manifest.json">
-    <!-- Ícone da Tartaruga -->
+    <!-- Ícone da Tartaruga apenas para o atalho do celular/PWA e abas -->
     <link rel="icon" type="image/png" href="/icon.png">
     <link rel="apple-touch-icon" href="/icon.png">
     <title>Chat Guilda WhatsApp Style</title>
@@ -95,13 +95,6 @@
             font-weight: bold;
             color: white;
             font-size: 1.1rem;
-            overflow: hidden;
-        }
-
-        .chat-avatar img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
         }
 
         .chat-info h2 {
@@ -313,13 +306,6 @@
             font-size: 1.8rem;
             margin: 0 auto 15px auto;
             box-shadow: 0 0 15px rgba(139, 92, 246, 0.4);
-            overflow: hidden;
-        }
-
-        .popup-icon-badge img {
-            width: 70%;
-            height: 70%;
-            object-fit: contain;
         }
 
         .popup-box h3 {
@@ -369,9 +355,7 @@
     <div class="chat-container">
         <div class="chat-header">
             <div class="header-left">
-                <div class="chat-avatar">
-                    <img src="/icon.png" alt="Guild Icon">
-                </div>
+                <div class="chat-avatar">⚔️</div>
                 <div class="chat-info">
                     <h2>Guild Chat</h2>
                     <span><div class="online-dot"></div> <span id="onlineCount">1</span> online</span>
@@ -405,9 +389,7 @@
 
         <div id="popupOverlay">
             <div class="popup-box">
-                <div class="popup-icon-badge">
-                    <img src="/icon.png" alt="Alert Icon">
-                </div>
+                <div class="popup-icon-badge">⚔️</div>
                 <h3>CONVOCAÇÃO DE QUEST</h3>
                 <p id="popupText">A guilda vai puxar agora!</p>
                 <button class="popup-close-btn" onclick="closePopup()">Entendido / Fechar</button>
