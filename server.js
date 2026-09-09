@@ -6,26 +6,26 @@ const app = express();
 const server = http.createServer(app);
 const io = new Server(server);
 
-// Servir os arquivos estáticos da pasta "public"
 app.use(express.static('public'));
 
-// Gerenciar conexões dos usuários
-io.on('connection', (socket) => {
-    console.log(`Usuário conectado: ${socket.id}`);
+let activeUsers = 0;
 
-    // Ouvir quando alguém mandar uma mensagem
+io.on('connection', (socket) => {
+    activeUsers++;
+    // Envia o número atualizado de usuários para todos
+    io.emit('stats', { activeUsers });
+
     socket.on('chat message', (data) => {
-        // Enviar a mensagem para todos os conectados, incluindo quem mandou
         io.emit('chat message', data);
     });
 
-    // Quando o usuário desconectar
     socket.on('disconnect', () => {
-        console.log(`Usuário desconectado: ${socket.id}`);
+        activeUsers = Math.max(0, activeUsers - 1);
+        io.emit('stats', { activeUsers });
     });
 });
 
 const PORT = process.env.PORT || 3000;
 server.listen(PORT, () => {
-    console.log(`Servidor rodando em http://localhost:${PORT}`);
+    console.log(`Servidor rodando na porta ${PORT}`);
 });
