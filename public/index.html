@@ -7,7 +7,7 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="theme-color" content="#111b21">
     <link rel="manifest" href="/manifest.json">
-    <title>Chat WhatsApp Style</title>
+    <title>Chat Guilda WhatsApp Style</title>
     <style>
         :root {
             --wa-bg: #0b141a;
@@ -19,6 +19,7 @@
             --wa-text-secondary: #8696a0;
             --wa-green: #00a884;
             --wa-input-bg: #2a3942;
+            --wa-red: #ef4444;
         }
 
         * {
@@ -48,6 +49,7 @@
             display: flex;
             flex-direction: column;
             box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+            position: relative;
         }
 
         @media (min-width: 768px) {
@@ -58,14 +60,19 @@
             }
         }
 
-        /* Header Estilo WhatsApp */
         .chat-header {
             background-color: var(--wa-header);
             padding: 10px 16px;
             display: flex;
             align-items: center;
-            gap: 12px;
+            justify-content: space-between;
             border-bottom: 1px solid rgba(255,255,255,0.05);
+        }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 12px;
         }
 
         .chat-avatar {
@@ -103,8 +110,57 @@
             box-shadow: 0 0 6px var(--wa-green);
         }
 
-        /* Corpo de Mensagens */
-        #messages {
+        .alert-toggle-btn {
+            background: var(--wa-input-bg);
+            border: 1px solid rgba(255,255,255,0.1);
+            color: var(--wa-text);
+            padding: 6px 10px;
+            border-radius: 6px;
+            font-size: 0.75rem;
+            cursor: pointer;
+        }
+        .alert-toggle-btn.active {
+            background: var(--wa-green);
+            color: white;
+            border-color: transparent;
+        }
+
+        .tabs-bar {
+            display: flex;
+            background-color: var(--wa-header);
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+        }
+
+        .tab-btn {
+            flex: 1;
+            padding: 10px;
+            background: none;
+            border: none;
+            color: var(--wa-text-secondary);
+            font-weight: 600;
+            font-size: 0.85rem;
+            cursor: pointer;
+            text-align: center;
+            border-bottom: 2px solid transparent;
+        }
+
+        .tab-btn.active {
+            color: var(--wa-green);
+            border-bottom: 2px solid var(--wa-green);
+        }
+
+        .chat-panel {
+            flex: 1;
+            display: none;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .chat-panel.active {
+            display: flex;
+        }
+
+        .messages-list {
             flex: 1;
             list-style-type: none;
             padding: 16px;
@@ -117,15 +173,15 @@
             background-size: 24px 24px;
         }
 
-        #messages::-webkit-scrollbar {
+        .messages-list::-webkit-scrollbar {
             width: 5px;
         }
-        #messages::-webkit-scrollbar-thumb {
+        .messages-list::-webkit-scrollbar-thumb {
             background: rgba(255,255,255,0.2);
             border-radius: 10px;
         }
 
-        #messages li {
+        .messages-list li {
             padding: 8px 12px;
             background-color: var(--wa-incoming);
             border-radius: 7.5px;
@@ -144,8 +200,7 @@
             display: block;
         }
 
-        /* Rodapé / Input de Envio */
-        #form {
+        .chat-form {
             background-color: var(--wa-header);
             padding: 10px 16px;
             display: flex;
@@ -167,15 +222,15 @@
             color: var(--wa-text-secondary);
         }
 
-        #inputName {
-            width: 100px;
+        .input-name {
+            width: 90px;
         }
 
-        #inputMessage {
+        .input-msg {
             flex: 1;
         }
 
-        button {
+        .send-btn {
             background-color: var(--wa-green);
             color: white;
             border: none;
@@ -186,85 +241,203 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            transition: transform 0.1s;
             flex-shrink: 0;
         }
-
-        button:active {
-            transform: scale(0.92);
+        .send-btn.guild-send {
+            background-color: #8b5cf6;
         }
 
-        button svg {
+        .send-btn svg {
             width: 18px;
             height: 18px;
             fill: white;
             transform: translateX(1px);
         }
+
+        #popupOverlay {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(5px);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 999;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .popup-box {
+            background: #1f2c34;
+            border: 2px solid #8b5cf6;
+            width: 85%;
+            max-width: 350px;
+            padding: 24px;
+            border-radius: 16px;
+            text-align: center;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+        }
+
+        .popup-box h3 {
+            color: #c084fc;
+            margin-bottom: 10px;
+            font-size: 1.2rem;
+        }
+
+        .popup-box p {
+            font-size: 0.95rem;
+            color: var(--wa-text);
+            margin-bottom: 20px;
+            word-break: break-word;
+        }
+
+        .popup-close-btn {
+            background: #8b5cf6;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-weight: bold;
+            cursor: pointer;
+            width: 100%;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
     </style>
 </head>
 <body>
     <div class="chat-container">
-        <!-- Header estilo WhatsApp -->
         <div class="chat-header">
-            <div class="chat-avatar">💬</div>
-            <div class="chat-info">
-                <h2>Chat Multiplayer</h2>
-                <span><div class="online-dot"></div> <span id="onlineCount">1</span> pessoa(s) online</span>
+            <div class="header-left">
+                <div class="chat-avatar">⚔️</div>
+                <div class="chat-info">
+                    <h2>Guild Chat</h2>
+                    <span><div class="online-dot"></div> <span id="onlineCount">1</span> online</span>
+                </div>
             </div>
+            <button id="toggleAlerts" class="alert-toggle-btn active" onclick="togglePopupSetting()">Pop-up: ON</button>
         </div>
 
-        <!-- Lista de Mensagens -->
-        <ul id="messages"></ul>
+        <div class="tabs-bar">
+            <button class="tab-btn active" onclick="switchTab('general')">💬 Chat Geral</button>
+            <button class="tab-btn" onclick="switchTab('guild')">🔥 Avisos de Quest</button>
+        </div>
 
-        <!-- Formulário de Envio -->
-        <form id="form">
-            <input id="inputName" placeholder="Nome" required autocomplete="off" />
-            <input id="inputMessage" placeholder="Digite uma mensagem..." required autocomplete="off" />
-            <button title="Enviar">
-                <svg viewBox="0 0 24 24"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"></path></svg>
-            </button>
-        </form>
+        <div id="generalPanel" class="chat-panel active">
+            <ul id="messagesGeneral" class="messages-list"></ul>
+            <form id="formGeneral" class="chat-form">
+                <input id="inputNameGen" class="input-name" placeholder="Nome" required autocomplete="off" />
+                <input id="inputMsgGen" class="input-msg" placeholder="Conversar no geral..." required autocomplete="off" />
+                <button class="send-btn" title="Enviar"><svg viewBox="0 0 24 24"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"></path></svg></button>
+            </form>
+        </div>
+
+        <div id="guildPanel" class="chat-panel">
+            <ul id="messagesGuild" class="messages-list"></ul>
+            <form id="formGuild" class="chat-form">
+                <input id="inputNameGuild" class="input-name" placeholder="Líder/Cargo" required autocomplete="off" />
+                <input id="inputMsgGuild" class="input-msg" placeholder="Mandar convocação de quest..." required autocomplete="off" />
+                <button class="send-btn guild-send" title="Enviar Alerta"><svg viewBox="0 0 24 24"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"></path></svg></button>
+            </form>
+        </div>
+
+        <div id="popupOverlay">
+            <div class="popup-box">
+                <h3>⚔️ CONVOCAÇÃO DE QUEST!</h3>
+                <p id="popupText">A guilda vai puxar agora!</p>
+                <button class="popup-close-btn" onclick="closePopup()">Entendido / Fechar</button>
+            </div>
+        </div>
     </div>
 
     <script src="/socket.io/socket.io.js"></script>
     <script>
         const socket = io();
-        const form = document.getElementById('form');
-        const inputName = document.getElementById('inputName');
-        const inputMessage = document.getElementById('inputMessage');
-        const messages = document.getElementById('messages');
         const onlineCount = document.getElementById('onlineCount');
+        
+        let popupsEnabled = true;
 
-        // Atualizar contador de online
+        function togglePopupSetting() {
+            popupsEnabled = !popupsEnabled;
+            const btn = document.getElementById('toggleAlerts');
+            if (popupsEnabled) {
+                btn.textContent = "Pop-up: ON";
+                btn.classList.add('active');
+            } else {
+                btn.textContent = "Pop-up: OFF";
+                btn.classList.remove('active');
+            }
+        }
+
+        function switchTab(tab) {
+            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+            document.querySelectorAll('.chat-panel').forEach(p => p.classList.remove('active'));
+
+            if (tab === 'general') {
+                document.querySelectorAll('.tab-btn')[0].classList.add('active');
+                document.getElementById('generalPanel').classList.add('active');
+            } else {
+                document.querySelectorAll('.tab-btn')[1].classList.add('active');
+                document.getElementById('guildPanel').classList.add('active');
+            }
+        }
+
         socket.on('stats', (data) => {
             onlineCount.textContent = data.activeUsers;
         });
 
-        form.addEventListener('submit', (e) => {
+        const formGeneral = document.getElementById('formGeneral');
+        formGeneral.addEventListener('submit', (e) => {
             e.preventDefault();
-            if (inputMessage.value && inputName.value) {
-                const data = {
-                    name: inputName.value,
-                    message: inputMessage.value
-                };
-                socket.emit('chat message', data);
-                inputMessage.value = '';
+            const msg = document.getElementById('inputMsgGen').value;
+            const name = document.getElementById('inputNameGen').value;
+            if (msg && name) {
+                socket.emit('chat message', { type: 'general', name, message: msg });
+                document.getElementById('inputMsgGen').value = '';
+            }
+        });
+
+        const formGuild = document.getElementById('formGuild');
+        formGuild.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const msg = document.getElementById('inputMsgGuild').value;
+            const name = document.getElementById('inputNameGuild').value;
+            if (msg && name) {
+                socket.emit('guild alert', { name, message: msg });
+                document.getElementById('inputMsgGuild').value = '';
             }
         });
 
         socket.on('chat message', (data) => {
+            const list = document.getElementById('messagesGeneral');
             const item = document.createElement('li');
             item.innerHTML = `<span class="msg-name">${data.name}</span>${data.message}`;
-            messages.appendChild(item);
-            messages.scrollTop = messages.scrollHeight;
+            list.appendChild(item);
+            list.scrollTop = list.scrollHeight;
         });
 
-        // Registrar o Service Worker para suportar PWA e tela cheia mobile
+        socket.on('guild alert', (data) => {
+            const list = document.getElementById('messagesGuild');
+            const item = document.createElement('li');
+            item.innerHTML = `<span class="msg-name" style="color: #c084fc;">[QUEST] ${data.name}</span>${data.message}`;
+            list.appendChild(item);
+            list.scrollTop = list.scrollHeight;
+
+            if (popupsEnabled) {
+                document.getElementById('popupText').textContent = `${data.name}: ${data.message}`;
+                document.getElementById('popupOverlay').style.display = 'flex';
+            }
+        });
+
+        function closePopup() {
+            document.getElementById('popupOverlay').style.display = 'none';
+        }
+
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
-                navigator.serviceWorker.register('/sw.js')
-                    .then((reg) => console.log('Service Worker registrado!', reg))
-                    .catch((err) => console.log('Erro ao registrar Service Worker:', err));
+                navigator.serviceWorker.register('/sw.js').catch(err => console.log(err));
             });
         }
     </script>
