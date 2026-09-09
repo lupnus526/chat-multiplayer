@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chat Multiplayer Node.js</title>
+    <style>
+        body { font-family: Arial, sans-serif; background: #f0f2f5; margin: 0; padding: 20px; display: flex; justify-content: center; }
+        .chat-container { width: 100%; max-width: 600px; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
+        #messages { list-style-type: none; padding: 0; height: 350px; overflow-y: scroll; border-bottom: 1px solid #ddd; margin-bottom: 10px; }
+        #messages li { padding: 8px 12px; margin-bottom: 8px; background: #e1ffc7; border-radius: 4px; word-break: break-all; }
+        #form { display: flex; gap: 10px; }
+        #inputName { width: 30%; padding: 10px; border: 1px solid #ccc; border-radius: 4px; }
+        #inputMessage { flex: 1; padding: 10px; border: 1px solid #ccc; border-radius: 4px; }
+        button { background: #007bff; color: white; border: none; padding: 10px 15px; border-radius: 4px; cursor: pointer; }
+        button:hover { background: #0056b3; }
+    </style>
+</head>
+<body>
+    <div class="chat-container">
+        <h2>Chat Multiplayer</h2>
+        <ul id="messages"></ul>
+        <form id="form">
+            <input id="inputName" placeholder="Seu nome" required autocomplete="off" />
+            <input id="inputMessage" placeholder="Digite sua mensagem..." required autocomplete="off" />
+            <button>Enviar</button>
+        </form>
+    </div>
+
+    <!-- Script do Socket.io do cliente -->
+    <script src="/socket.io/socket.io.js"></script>
+    <script>
+        const socket = io();
+
+        const form = document.getElementById('form');
+        const inputName = document.getElementById('inputName');
+        const inputMessage = document.getElementById('inputMessage');
+        const messages = document.getElementById('messages');
+
+        form.addEventListener('submit', (e) => {
+            e.preventDefault();
+            if (inputMessage.value && inputName.value) {
+                const data = {
+                    name: inputName.value,
+                    message: inputMessage.value
+                };
+                socket.emit('chat message', data);
+                inputMessage.value = '';
+            }
+        });
+
+        socket.on('chat message', (data) => {
+            const item = document.createElement('li');
+            item.textContent = `${data.name}: ${data.message}`;
+            messages.appendChild(item);
+            messages.scrollTop = messages.scrollHeight; // Rolar para a última mensagem
+        });
+    </script>
+</body>
+</html>
