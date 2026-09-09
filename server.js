@@ -12,11 +12,16 @@ let activeUsers = 0;
 
 io.on('connection', (socket) => {
     activeUsers++;
-    // Envia o número atualizado de usuários para todos
     io.emit('stats', { activeUsers });
 
+    // Chat Geral
     socket.on('chat message', (data) => {
         io.emit('chat message', data);
+    });
+
+    // Alerta de Pop-up da Guilda
+    socket.on('guild alert', (data) => {
+        io.emit('guild alert', data);
     });
 
     socket.on('disconnect', () => {
