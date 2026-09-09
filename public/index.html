@@ -19,7 +19,7 @@
             --wa-text-secondary: #8696a0;
             --wa-green: #00a884;
             --wa-input-bg: #2a3942;
-            --wa-red: #ef4444;
+            --wa-purple: #8b5cf6;
         }
 
         * {
@@ -29,6 +29,7 @@
             font-family: 'Segoe UI', Helvetica, Arial, sans-serif;
         }
 
+        /* Bloqueia rolagem indesejada do body e fixa no tamanho real da tela (dvh) */
         body {
             background-color: var(--wa-bg);
             color: var(--wa-text);
@@ -38,6 +39,8 @@
             justify-content: center;
             align-items: center;
             overflow: hidden;
+            position: fixed;
+            width: 100%;
         }
 
         .chat-container {
@@ -45,6 +48,7 @@
             height: 100%;
             max-width: 800px;
             max-height: 100vh;
+            max-height: 100dvh;
             background-color: var(--wa-panel);
             display: flex;
             flex-direction: column;
@@ -67,6 +71,7 @@
             align-items: center;
             justify-content: space-between;
             border-bottom: 1px solid rgba(255,255,255,0.05);
+            flex-shrink: 0;
         }
 
         .header-left {
@@ -129,6 +134,7 @@
             display: flex;
             background-color: var(--wa-header);
             border-bottom: 1px solid rgba(255,255,255,0.05);
+            flex-shrink: 0;
         }
 
         .tab-btn {
@@ -154,6 +160,7 @@
             display: none;
             flex-direction: column;
             overflow: hidden;
+            min-height: 0; /* Essencial para flexbox não estourar com teclado mobile */
         }
 
         .chat-panel.active {
@@ -206,6 +213,7 @@
             display: flex;
             gap: 8px;
             align-items: center;
+            flex-shrink: 0;
         }
 
         input {
@@ -244,7 +252,7 @@
             flex-shrink: 0;
         }
         .send-btn.guild-send {
-            background-color: #8b5cf6;
+            background-color: var(--wa-purple);
         }
 
         .send-btn svg {
@@ -254,56 +262,86 @@
             transform: translateX(1px);
         }
 
+        /* Novo Pop-up Estilizado (Modo Vidro/Neon) */
         #popupOverlay {
             position: absolute;
             top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0, 0, 0, 0.7);
-            backdrop-filter: blur(5px);
+            background: rgba(5, 8, 12, 0.8);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
             display: none;
             justify-content: center;
             align-items: center;
             z-index: 999;
-            animation: fadeIn 0.3s ease;
+            padding: 20px;
         }
 
         .popup-box {
-            background: #1f2c34;
-            border: 2px solid #8b5cf6;
-            width: 85%;
-            max-width: 350px;
-            padding: 24px;
-            border-radius: 16px;
+            background: linear-gradient(145deg, #182229, #111b21);
+            border: 2px solid var(--wa-purple);
+            width: 100%;
+            max-width: 380px;
+            padding: 28px 24px;
+            border-radius: 20px;
             text-align: center;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+            box-shadow: 0 15px 35px rgba(139, 92, 246, 0.25), 0 5px 15px rgba(0,0,0,0.5);
+            animation: popIn 0.35s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        .popup-icon-badge {
+            width: 60px;
+            height: 60px;
+            background: rgba(139, 92, 246, 0.15);
+            border: 2px solid var(--wa-purple);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.8rem;
+            margin: 0 auto 15px auto;
+            box-shadow: 0 0 15px rgba(139, 92, 246, 0.4);
         }
 
         .popup-box h3 {
-            color: #c084fc;
-            margin-bottom: 10px;
-            font-size: 1.2rem;
+            color: #d8b4fe;
+            margin-bottom: 8px;
+            font-size: 1.3rem;
+            letter-spacing: 0.5px;
         }
 
         .popup-box p {
             font-size: 0.95rem;
-            color: var(--wa-text);
-            margin-bottom: 20px;
+            color: var(--wa-text-secondary);
+            margin-bottom: 24px;
             word-break: break-word;
+            background: rgba(0,0,0,0.25);
+            padding: 12px;
+            border-radius: 10px;
+            border-left: 4px solid var(--wa-purple);
+            text-align: left;
         }
 
         .popup-close-btn {
-            background: #8b5cf6;
+            background: linear-gradient(135deg, #8b5cf6, #7c3aed);
             color: white;
             border: none;
-            padding: 10px 20px;
-            border-radius: 8px;
-            font-weight: bold;
+            padding: 12px 20px;
+            border-radius: 12px;
+            font-weight: 600;
+            font-size: 1rem;
             cursor: pointer;
             width: 100%;
+            box-shadow: 0 4px 12px rgba(139, 92, 246, 0.4);
+            transition: transform 0.1s ease;
         }
 
-        @keyframes fadeIn {
-            from { opacity: 0; }
-            to { opacity: 1; }
+        .popup-close-btn:active {
+            transform: scale(0.96);
+        }
+
+        @keyframes popIn {
+            from { transform: scale(0.8); opacity: 0; }
+            to { transform: scale(1); opacity: 1; }
         }
     </style>
 </head>
@@ -338,14 +376,15 @@
             <ul id="messagesGuild" class="messages-list"></ul>
             <form id="formGuild" class="chat-form">
                 <input id="inputNameGuild" class="input-name" placeholder="Líder/Cargo" required autocomplete="off" />
-                <input id="inputMsgGuild" class="input-msg" placeholder="Mandar convocação de quest..." required autocomplete="off" />
+                <input id="inputMsgGuild" class="input-msg" placeholder="Mandar convocação..." required autocomplete="off" />
                 <button class="send-btn guild-send" title="Enviar Alerta"><svg viewBox="0 0 24 24"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"></path></svg></button>
             </form>
         </div>
 
         <div id="popupOverlay">
             <div class="popup-box">
-                <h3>⚔️ CONVOCAÇÃO DE QUEST!</h3>
+                <div class="popup-icon-badge">⚔️</div>
+                <h3>CONVOCAÇÃO DE QUEST</h3>
                 <p id="popupText">A guilda vai puxar agora!</p>
                 <button class="popup-close-btn" onclick="closePopup()">Entendido / Fechar</button>
             </div>
@@ -358,6 +397,11 @@
         const onlineCount = document.getElementById('onlineCount');
         
         let popupsEnabled = true;
+
+        // Pede permissão para notificações nativas do celular ao carregar
+        if ('Notification' in window && Notification.permission !== 'granted') {
+            Notification.requestPermission();
+        }
 
         function togglePopupSetting() {
             popupsEnabled = !popupsEnabled;
@@ -425,9 +469,29 @@
             list.appendChild(item);
             list.scrollTop = list.scrollHeight;
 
+            // Exibe o pop-up visual bonito dentro do app
             if (popupsEnabled) {
                 document.getElementById('popupText').textContent = `${data.name}: ${data.message}`;
                 document.getElementById('popupOverlay').style.display = 'flex';
+            }
+
+            // Dispara Notificação Nativa do Celular (mesmo se o app estiver minimizado)
+            if ('Notification' in window && Notification.permission === 'granted') {
+                try {
+                    navigator.serviceWorker.ready.then(registration => {
+                        registration.showNotification("⚔️ Convocação de Quest!", {
+                            body: `${data.name}: ${data.message}`,
+                            icon: 'https://cdn-icons-png.flaticon.com/512/733/733585.png',
+                            badge: 'https://cdn-icons-png.flaticon.com/512/733/733585.png',
+                            vibrate: [200, 100, 200]
+                        });
+                    });
+                } catch (e) {
+                    // Fallback básico caso o service worker precise de contexto direto
+                    new Notification("⚔️ Convocação de Quest!", {
+                        body: `${data.name}: ${data.message}`
+                    });
+                }
             }
         });
 
