@@ -3,11 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="theme-color" content="#0b141a">
     <link rel="manifest" href="/manifest.json">
-    <!-- Ícone da Tartaruga apenas para o atalho do celular/PWA e abas -->
     <link rel="icon" type="image/png" href="/icon.png">
     <link rel="apple-touch-icon" href="/icon.png">
     <title>Chat Guilda WhatsApp Style</title>
@@ -25,17 +22,10 @@
             --wa-purple: #8b5cf6;
         }
 
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-            font-family: 'Segoe UI', Helvetica, Arial, sans-serif;
-        }
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Helvetica, Arial, sans-serif; }
 
-        /* Força a cor de fundo padrão imediatamente para evitar tela preta ao abrir */
         html, body {
             background-color: #0b141a !important;
-            background: #0b141a !important;
             color: var(--wa-text);
             height: 100vh;
             height: 100dvh;
@@ -47,6 +37,53 @@
             width: 100%;
         }
 
+        /* Tela de Login */
+        #loginScreen {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            background: var(--wa-panel);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            padding: 20px;
+        }
+
+        .login-box {
+            background: var(--wa-header);
+            padding: 30px;
+            border-radius: 12px;
+            width: 100%;
+            max-width: 350px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.6);
+            text-align: center;
+        }
+
+        .login-box h2 { margin-bottom: 20px; color: var(--wa-green); }
+        .login-box input {
+            width: 100%;
+            margin-bottom: 15px;
+            background: var(--wa-input-bg);
+            border: none;
+            padding: 12px;
+            border-radius: 8px;
+            color: white;
+            outline: none;
+        }
+        .login-box button {
+            width: 100%;
+            padding: 12px;
+            background: var(--wa-green);
+            border: none;
+            border-radius: 8px;
+            color: white;
+            font-weight: bold;
+            cursor: pointer;
+        }
+        .login-error { color: #f87171; font-size: 0.85rem; margin-top: 10px; display: none; }
+
+        /* Container Principal */
         .chat-container {
             width: 100%;
             height: 100%;
@@ -54,18 +91,14 @@
             max-height: 100vh;
             max-height: 100dvh;
             background-color: var(--wa-panel);
-            display: flex;
+            display: none;
             flex-direction: column;
             box-shadow: 0 4px 15px rgba(0,0,0,0.5);
             position: relative;
         }
 
         @media (min-width: 768px) {
-            .chat-container {
-                height: 90vh;
-                border-radius: 12px;
-                border: 1px solid rgba(255,255,255,0.08);
-            }
+            .chat-container { height: 90vh; border-radius: 12px; border: 1px solid rgba(255,255,255,0.08); }
         }
 
         .chat-header {
@@ -78,99 +111,18 @@
             flex-shrink: 0;
         }
 
-        .header-left {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-        }
+        .header-left { display: flex; align-items: center; gap: 12px; }
+        .chat-avatar { width: 40px; height: 40px; background: var(--wa-green); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; color: white; }
+        .chat-info h2 { font-size: 1rem; font-weight: 500; }
+        .chat-info span { font-size: 0.75rem; color: var(--wa-text-secondary); display: flex; align-items: center; gap: 5px; }
+        .online-dot { width: 8px; height: 8px; background-color: var(--wa-green); border-radius: 50%; }
 
-        .chat-avatar {
-            width: 40px;
-            height: 40px;
-            background: var(--wa-green);
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: bold;
-            color: white;
-            font-size: 1.1rem;
-        }
+        .tabs-bar { display: flex; background-color: var(--wa-header); border-bottom: 1px solid rgba(255,255,255,0.05); flex-shrink: 0; }
+        .tab-btn { flex: 1; padding: 10px; background: none; border: none; color: var(--wa-text-secondary); font-weight: 600; font-size: 0.8rem; cursor: pointer; text-align: center; border-bottom: 2px solid transparent; }
+        .tab-btn.active { color: var(--wa-green); border-bottom: 2px solid var(--wa-green); }
 
-        .chat-info h2 {
-            font-size: 1rem;
-            font-weight: 500;
-            color: var(--wa-text);
-        }
-
-        .chat-info span {
-            font-size: 0.75rem;
-            color: var(--wa-text-secondary);
-            display: flex;
-            align-items: center;
-            gap: 5px;
-        }
-
-        .online-dot {
-            width: 8px;
-            height: 8px;
-            background-color: var(--wa-green);
-            border-radius: 50%;
-            box-shadow: 0 0 6px var(--wa-green);
-        }
-
-        .alert-toggle-btn {
-            background: var(--wa-input-bg);
-            border: 1px solid rgba(255,255,255,0.1);
-            color: var(--wa-text);
-            padding: 6px 10px;
-            border-radius: 6px;
-            font-size: 0.75rem;
-            cursor: pointer;
-        }
-        .alert-toggle-btn.active {
-            background: var(--wa-green);
-            color: white;
-            border-color: transparent;
-        }
-
-        .tabs-bar {
-            display: flex;
-            background-color: var(--wa-header);
-            border-bottom: 1px solid rgba(255,255,255,0.05);
-            flex-shrink: 0;
-        }
-
-        .tab-btn {
-            flex: 1;
-            padding: 10px;
-            background: none;
-            border: none;
-            color: var(--wa-text-secondary);
-            font-weight: 600;
-            font-size: 0.85rem;
-            cursor: pointer;
-            text-align: center;
-            border-bottom: 2px solid transparent;
-        }
-
-        .tab-btn.active {
-            color: var(--wa-green);
-            border-bottom: 2px solid var(--wa-green);
-        }
-
-        /* Garante que o painel se contenha perfeitamente ao abrir o teclado */
-        .chat-panel {
-            flex: 1;
-            display: none;
-            flex-direction: column;
-            height: 0;
-            min-height: 0;
-        }
-
-        .chat-panel.active {
-            display: flex;
-        }
+        .chat-panel { flex: 1; display: none; flex-direction: column; height: 0; min-height: 0; }
+        .chat-panel.active { display: flex; }
 
         .messages-list {
             flex: 1;
@@ -181,17 +133,7 @@
             flex-direction: column;
             gap: 8px;
             background-color: #0b141a;
-            background-image: radial-gradient(rgba(255,255,255,0.03) 1px, transparent 0);
-            background-size: 24px 24px;
             min-height: 0;
-        }
-
-        .messages-list::-webkit-scrollbar {
-            width: 5px;
-        }
-        .messages-list::-webkit-scrollbar-thumb {
-            background: rgba(255,255,255,0.2);
-            border-radius: 10px;
         }
 
         .messages-list li {
@@ -201,225 +143,180 @@
             max-width: 75%;
             word-break: break-word;
             font-size: 0.9rem;
-            box-shadow: 0 1px 0.5px rgba(0,0,0,0.3);
             position: relative;
         }
+        .msg-name { font-size: 0.75rem; font-weight: bold; color: #f1f1f1; margin-bottom: 2px; display: block; }
 
-        .msg-name {
-            font-size: 0.75rem;
-            font-weight: bold;
-            color: #f1f1f1;
-            margin-bottom: 2px;
-            display: block;
-        }
+        .chat-form { background-color: var(--wa-header); padding: 10px 16px; display: flex; gap: 8px; align-items: center; flex-shrink: 0; }
+        input.msg-input { flex: 1; background-color: var(--wa-input-bg); border: none; border-radius: 8px; padding: 12px 14px; color: var(--wa-text); font-size: 0.95rem; outline: none; }
+        select.msg-input { width: 130px; background-color: var(--wa-input-bg); border: none; border-radius: 8px; padding: 12px; color: var(--wa-text); font-size: 0.9rem; outline: none; }
 
-        .chat-form {
-            background-color: var(--wa-header);
-            padding: 10px 16px;
-            display: flex;
-            gap: 8px;
-            align-items: center;
-            flex-shrink: 0;
-        }
+        .send-btn { background-color: var(--wa-green); color: white; border: none; width: 42px; height: 42px; border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+        .send-btn.guild-send { background-color: var(--wa-purple); }
+        .send-btn svg { width: 18px; height: 18px; fill: white; transform: translateX(1px); }
 
-        input {
-            background-color: var(--wa-input-bg);
-            border: none;
-            border-radius: 8px;
-            padding: 12px 14px;
-            color: var(--wa-text);
-            font-size: 0.95rem;
-            outline: none;
-        }
-
-        input::placeholder {
-            color: var(--wa-text-secondary);
-        }
-
-        .input-name {
-            width: 90px;
-        }
-
-        .input-msg {
-            flex: 1;
-        }
-
-        .send-btn {
-            background-color: var(--wa-green);
-            color: white;
-            border: none;
-            width: 42px;
-            height: 42px;
-            border-radius: 50%;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            flex-shrink: 0;
-        }
-        .send-btn.guild-send {
-            background-color: var(--wa-purple);
-        }
-
-        .send-btn svg {
-            width: 18px;
-            height: 18px;
-            fill: white;
-            transform: translateX(1px);
-        }
-
-        /* Pop-up Estilizado (Modo Vidro/Neon) */
-        #popupOverlay {
-            position: absolute;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(5, 8, 12, 0.8);
-            backdrop-filter: blur(8px);
-            -webkit-backdrop-filter: blur(8px);
-            display: none;
-            justify-content: center;
-            align-items: center;
-            z-index: 999;
-            padding: 20px;
-        }
-
-        .popup-box {
-            background: linear-gradient(145deg, #182229, #111b21);
-            border: 2px solid var(--wa-purple);
-            width: 100%;
-            max-width: 380px;
-            padding: 28px 24px;
-            border-radius: 20px;
-            text-align: center;
-            box-shadow: 0 15px 35px rgba(139, 92, 246, 0.25), 0 5px 15px rgba(0,0,0,0.5);
-            animation: popIn 0.35s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-        }
-
-        .popup-icon-badge {
-            width: 60px;
-            height: 60px;
-            background: rgba(139, 92, 246, 0.15);
-            border: 2px solid var(--wa-purple);
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 1.8rem;
-            margin: 0 auto 15px auto;
-            box-shadow: 0 0 15px rgba(139, 92, 246, 0.4);
-        }
-
-        .popup-box h3 {
-            color: #d8b4fe;
-            margin-bottom: 8px;
-            font-size: 1.3rem;
-            letter-spacing: 0.5px;
-        }
-
-        .popup-box p {
-            font-size: 0.95rem;
-            color: var(--wa-text-secondary);
-            margin-bottom: 24px;
-            word-break: break-word;
-            background: rgba(0,0,0,0.25);
-            padding: 12px;
-            border-radius: 10px;
-            border-left: 4px solid var(--wa-purple);
-            text-align: left;
-        }
-
-        .popup-close-btn {
-            background: linear-gradient(135deg, #8b5cf6, #7c3aed);
-            color: white;
-            border: none;
-            padding: 12px 20px;
-            border-radius: 12px;
-            font-weight: 600;
-            font-size: 1rem;
-            cursor: pointer;
-            width: 100%;
-            box-shadow: 0 4px 12px rgba(139, 92, 246, 0.4);
-            transition: transform 0.1s ease;
-        }
-
-        .popup-close-btn:active {
-            transform: scale(0.96);
-        }
-
-        @keyframes popIn {
-            from { transform: scale(0.8); opacity: 0; }
-            to { transform: scale(1); opacity: 1; }
-        }
+        #popupOverlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(5, 8, 12, 0.8); display: none; justify-content: center; align-items: center; z-index: 999; padding: 20px; }
+        .popup-box { background: #111b21; border: 2px solid var(--wa-purple); width: 100%; max-width: 380px; padding: 24px; border-radius: 20px; text-align: center; }
+        .popup-box h3 { color: #d8b4fe; margin-bottom: 8px; }
+        .popup-box p { color: var(--wa-text-secondary); margin-bottom: 20px; }
+        .popup-close-btn { background: var(--wa-purple); color: white; border: none; padding: 10px 20px; border-radius: 10px; width: 100%; cursor: pointer; }
     </style>
 </head>
 <body>
-    <div class="chat-container">
+
+    <!-- TELA DE LOGIN -->
+    <div id="loginScreen">
+        <div class="login-box">
+            <h2>⚔️ Guild Login</h2>
+            <form id="loginForm">
+                <input type="text" id="loginUser" placeholder="Usuário" required autocomplete="off" />
+                <input type="password" id="loginPass" placeholder="Senha" required />
+                <button type="submit">Entrar no Chat</button>
+                <div id="loginError" class="login-error">Usuário ou senha incorretos</div>
+            </form>
+        </div>
+    </div>
+
+    <!-- CHAT PRINCIPAL -->
+    <div class="chat-container" id="mainChatContainer">
         <div class="chat-header">
             <div class="header-left">
                 <div class="chat-avatar">⚔️</div>
                 <div class="chat-info">
-                    <h2>Guild Chat</h2>
+                    <h2 id="welcomeTitle">Guild Chat</h2>
                     <span><div class="online-dot"></div> <span id="onlineCount">1</span> online</span>
                 </div>
             </div>
-            <button id="toggleAlerts" class="alert-toggle-btn active" onclick="togglePopupSetting()">Pop-up: ON</button>
+            <span id="userBadge" style="font-size: 0.8rem; background: var(--wa-input-bg); padding: 4px 8px; border-radius: 6px;"></span>
         </div>
 
         <div class="tabs-bar">
             <button class="tab-btn active" onclick="switchTab('general')">💬 Chat Geral</button>
-            <button class="tab-btn" onclick="switchTab('guild')">🔥 Avisos de Quest</button>
+            <button class="tab-btn" onclick="switchTab('guild')">🔥 Avisos Quest</button>
+            <button class="tab-btn" onclick="switchTab('private')">📩 Mensagens Diretas</button>
         </div>
 
+        <!-- Painel Chat Geral da Guilda -->
         <div id="generalPanel" class="chat-panel active">
             <ul id="messagesGeneral" class="messages-list"></ul>
             <form id="formGeneral" class="chat-form">
-                <input id="inputNameGen" class="input-name" placeholder="Nome" required autocomplete="off" />
-                <input id="inputMsgGen" class="input-msg" placeholder="Conversar no geral..." required autocomplete="off" />
+                <input id="inputMsgGen" class="msg-input" placeholder="Conversar com a guilda..." required autocomplete="off" />
                 <button class="send-btn" title="Enviar"><svg viewBox="0 0 24 24"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"></path></svg></button>
             </form>
         </div>
 
+        <!-- Painel Avisos de Quest (Restrito a Admins) -->
         <div id="guildPanel" class="chat-panel">
             <ul id="messagesGuild" class="messages-list"></ul>
             <form id="formGuild" class="chat-form">
-                <input id="inputNameGuild" class="input-name" placeholder="Líder/Cargo" required autocomplete="off" />
-                <input id="inputMsgGuild" class="input-msg" placeholder="Mandar convocação..." required autocomplete="off" />
+                <input id="inputMsgGuild" class="msg-input" placeholder="Aviso oficial da guilda..." required autocomplete="off" />
                 <button class="send-btn guild-send" title="Enviar Alerta"><svg viewBox="0 0 24 24"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"></path></svg></button>
             </form>
         </div>
 
+        <!-- Painel Mensagens Diretas (Estilo WhatsApp entre pessoas) -->
+        <div id="privatePanel" class="chat-panel">
+            <ul id="messagesPrivate" class="messages-list"></ul>
+            <form id="formPrivate" class="chat-form">
+                <select id="selectReceiver" class="msg-input" required>
+                    <option value="">Para quem?</option>
+                    <option value="admin">admin</option>
+                    <option value="alexandre">alexandre</option>
+                    <option value="membro1">membro1</option>
+                    <option value="membro2">membro2</option>
+                </select>
+                <input id="inputMsgPrivate" class="msg-input" placeholder="Mensagem privada..." required autocomplete="off" />
+                <button class="send-btn" title="Enviar PV"><svg viewBox="0 0 24 24"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"></path></svg></button>
+            </form>
+        </div>
+
+        <!-- Pop-up de Aviso -->
         <div id="popupOverlay">
             <div class="popup-box">
-                <div class="popup-icon-badge">⚔️</div>
-                <h3>CONVOCAÇÃO DE QUEST</h3>
+                <h3>⚔️ CONVOCAÇÃO DE QUEST</h3>
                 <p id="popupText">A guilda vai puxar agora!</p>
-                <button class="popup-close-btn" onclick="closePopup()">Entendido / Fechar</button>
+                <button class="popup-close-btn" onclick="closePopup()">Entendido</button>
             </div>
         </div>
     </div>
 
     <script src="/socket.io/socket.io.js"></script>
     <script>
-        const socket = io();
-        const onlineCount = document.getElementById('onlineCount');
-        
-        let popupsEnabled = true;
+        let socket;
+        let currentUser = '';
+        let currentRole = '';
 
-        // Pede permissão para notificações nativas do celular ao carregar
-        if ('Notification' in window && Notification.permission !== 'granted') {
-            Notification.requestPermission();
-        }
+        document.getElementById('loginForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const username = document.getElementById('loginUser').value.trim();
+            const password = document.getElementById('loginPass').value.trim();
 
-        function togglePopupSetting() {
-            popupsEnabled = !popupsEnabled;
-            const btn = document.getElementById('toggleAlerts');
-            if (popupsEnabled) {
-                btn.textContent = "Pop-up: ON";
-                btn.classList.add('active');
+            const response = await fetch('/api/login', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ username, password })
+            });
+
+            const result = await response.json();
+            if (result.success) {
+                currentUser = result.username;
+                currentRole = result.role;
+
+                document.getElementById('loginScreen').style.display = 'none';
+                document.getElementById('mainChatContainer').style.display = 'flex';
+                document.getElementById('userBadge').textContent = `${currentUser} (${currentRole.toUpperCase()})`;
+                document.getElementById('welcomeTitle').textContent = `Guild Chat - ${currentUser}`;
+
+                // Se não for admin, oculta ou avisa na aba de avisos
+                if (currentRole !== 'admin') {
+                    document.getElementById('formGuild').style.display = 'none';
+                    const li = document.createElement('li');
+                    li.style.color = '#8696a0';
+                    li.textContent = "Apenas administradores podem enviar avisos de quest aqui.";
+                    document.getElementById('messagesGuild').appendChild(li);
+                }
+
+                // Inicia conexão socket
+                socket = io();
+                socket.emit('register-user-socket', currentUser);
+
+                socket.on('stats', (data) => {
+                    document.getElementById('onlineCount').textContent = data.activeUsers;
+                });
+
+                socket.on('chat message', (data) => {
+                    const list = document.getElementById('messagesGeneral');
+                    const item = document.createElement('li');
+                    item.innerHTML = `<span class="msg-name">${data.name}</span>${data.message}`;
+                    list.appendChild(item);
+                    list.scrollTop = list.scrollHeight;
+                });
+
+                socket.on('guild alert', (data) => {
+                    const list = document.getElementById('messagesGuild');
+                    const item = document.createElement('li');
+                    item.innerHTML = `<span class="msg-name" style="color: #c084fc;">[QUEST] ${data.name}</span>${data.message}`;
+                    list.appendChild(item);
+                    list.scrollTop = list.scrollHeight;
+
+                    document.getElementById('popupText').textContent = `${data.name}: ${data.message}`;
+                    document.getElementById('popupOverlay').style.display = 'flex';
+                });
+
+                socket.on('private message', (data) => {
+                    const list = document.getElementById('messagesPrivate');
+                    const item = document.createElement('li');
+                    const label = data.sender === currentUser ? `Para: ${data.receiver}` : `De: ${data.sender}`;
+                    item.style.background = '#182229';
+                    item.innerHTML = `<span class="msg-name" style="color: #34d399;">[PV] ${label}</span>${data.message}`;
+                    list.appendChild(item);
+                    list.scrollTop = list.scrollHeight;
+                });
+
             } else {
-                btn.textContent = "Pop-up: OFF";
-                btn.classList.remove('active');
+                document.getElementById('loginError').style.display = 'block';
             }
-        }
+        });
 
         function switchTab(tab) {
             document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
@@ -428,86 +325,48 @@
             if (tab === 'general') {
                 document.querySelectorAll('.tab-btn')[0].classList.add('active');
                 document.getElementById('generalPanel').classList.add('active');
-            } else {
+            } else if (tab === 'guild') {
                 document.querySelectorAll('.tab-btn')[1].classList.add('active');
                 document.getElementById('guildPanel').classList.add('active');
+            } else {
+                document.querySelectorAll('.tab-btn')[2].classList.add('active');
+                document.getElementById('privatePanel').classList.add('active');
             }
         }
 
-        socket.on('stats', (data) => {
-            onlineCount.textContent = data.activeUsers;
-        });
-
-        const formGeneral = document.getElementById('formGeneral');
-        formGeneral.addEventListener('submit', (e) => {
+        // Envio Chat Geral
+        document.getElementById('formGeneral').addEventListener('submit', (e) => {
             e.preventDefault();
             const msg = document.getElementById('inputMsgGen').value;
-            const name = document.getElementById('inputNameGen').value;
-            if (msg && name) {
-                socket.emit('chat message', { type: 'general', name, message: msg });
+            if (msg) {
+                socket.emit('chat message', { name: currentUser, message: msg });
                 document.getElementById('inputMsgGen').value = '';
             }
         });
 
-        const formGuild = document.getElementById('formGuild');
-        formGuild.addEventListener('submit', (e) => {
+        // Envio Avisos Guilda (Admin)
+        document.getElementById('formGuild').addEventListener('submit', (e) => {
             e.preventDefault();
             const msg = document.getElementById('inputMsgGuild').value;
-            const name = document.getElementById('inputNameGuild').value;
-            if (msg && name) {
-                socket.emit('guild alert', { name, message: msg });
+            if (msg && currentRole === 'admin') {
+                socket.emit('guild alert', { name: currentUser, message: msg });
                 document.getElementById('inputMsgGuild').value = '';
             }
         });
 
-        socket.on('chat message', (data) => {
-            const list = document.getElementById('messagesGeneral');
-            const item = document.createElement('li');
-            item.innerHTML = `<span class="msg-name">${data.name}</span>${data.message}`;
-            list.appendChild(item);
-            list.scrollTop = list.scrollHeight;
-        });
-
-        socket.on('guild alert', (data) => {
-            const list = document.getElementById('messagesGuild');
-            const item = document.createElement('li');
-            item.innerHTML = `<span class="msg-name" style="color: #c084fc;">[QUEST] ${data.name}</span>${data.message}`;
-            list.appendChild(item);
-            list.scrollTop = list.scrollHeight;
-
-            // Exibe o pop-up visual bonito dentro do app
-            if (popupsEnabled) {
-                document.getElementById('popupText').textContent = `${data.name}: ${data.message}`;
-                document.getElementById('popupOverlay').style.display = 'flex';
-            }
-
-            // Dispara Notificação Nativa do Celular (mesmo se o app estiver minimizado)
-            if ('Notification' in window && Notification.permission === 'granted') {
-                try {
-                    navigator.serviceWorker.ready.then(registration => {
-                        registration.showNotification("⚔️ Convocação de Quest!", {
-                            body: `${data.name}: ${data.message}`,
-                            icon: '/icon.png',
-                            badge: '/icon.png',
-                            vibrate: [200, 100, 200]
-                        });
-                    });
-                } catch (e) {
-                    new Notification("⚔️ Convocação de Quest!", {
-                        body: `${data.name}: ${data.message}`
-                    });
-                }
+        // Envio Mensagem Privada
+        document.getElementById('formPrivate').addEventListener('submit', (e) => {
+            e.preventDefault();
+            const receiver = document.getElementById('selectReceiver').value;
+            const msg = document.getElementById('inputMsgPrivate').value;
+            if (msg && receiver) {
+                socket.emit('private message', { sender: currentUser, receiver, message: msg });
+                document.getElementById('inputMsgPrivate').value = '';
             }
         });
 
         function closePopup() {
             document.getElementById('popupOverlay').style.display = 'none';
-        }
-
-        if ('serviceWorker' in navigator) {
-            window.addEventListener('load', () => {
-                navigator.serviceWorker.register('/sw.js').catch(err => console.log(err));
-            });
         }
     </script>
 </body>
