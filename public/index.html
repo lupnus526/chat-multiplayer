@@ -117,8 +117,8 @@
         .chat-info span { font-size: 0.75rem; color: var(--wa-text-secondary); display: flex; align-items: center; gap: 5px; }
         .online-dot { width: 8px; height: 8px; background-color: var(--wa-green); border-radius: 50%; }
 
-        .tabs-bar { display: flex; background-color: var(--wa-header); border-bottom: 1px solid rgba(255,255,255,0.05); flex-shrink: 0; }
-        .tab-btn { flex: 1; padding: 10px; background: none; border: none; color: var(--wa-text-secondary); font-weight: 600; font-size: 0.8rem; cursor: pointer; text-align: center; border-bottom: 2px solid transparent; }
+        .tabs-bar { display: flex; background-color: var(--wa-header); border-bottom: 1px solid rgba(255,255,255,0.05); flex-shrink: 0; overflow-x: auto; }
+        .tab-btn { flex: 1; padding: 10px 8px; background: none; border: none; color: var(--wa-text-secondary); font-weight: 600; font-size: 0.75rem; cursor: pointer; text-align: center; border-bottom: 2px solid transparent; white-space: nowrap; }
         .tab-btn.active { color: var(--wa-green); border-bottom: 2px solid var(--wa-green); }
 
         .chat-panel { flex: 1; display: none; flex-direction: column; height: 0; min-height: 0; }
@@ -193,7 +193,8 @@
         <div class="tabs-bar">
             <button class="tab-btn active" onclick="switchTab('general')">💬 Chat Geral</button>
             <button class="tab-btn" onclick="switchTab('guild')">🔥 Avisos Quest</button>
-            <button class="tab-btn" onclick="switchTab('private')">📩 Mensagens Diretas</button>
+            <button class="tab-btn" onclick="switchTab('private')">📩 Diretas</button>
+            <button class="tab-btn" onclick="switchTab('gb')">🏦 Banco GB</button>
         </div>
 
         <!-- Painel Chat Geral da Guilda -->
@@ -214,7 +215,7 @@
             </form>
         </div>
 
-        <!-- Painel Mensagens Diretas (Estilo WhatsApp entre pessoas) -->
+        <!-- Painel Mensagens Diretas (Estilo WhatsApp) -->
         <div id="privatePanel" class="chat-panel">
             <ul id="messagesPrivate" class="messages-list"></ul>
             <form id="formPrivate" class="chat-form">
@@ -228,6 +229,21 @@
                 <input id="inputMsgPrivate" class="msg-input" placeholder="Mensagem privada..." required autocomplete="off" />
                 <button class="send-btn" title="Enviar PV"><svg viewBox="0 0 24 24"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"></path></svg></button>
             </form>
+        </div>
+
+        <!-- Painel Banco da Guilda (GB) -->
+        <div id="gbPanel" class="chat-panel">
+            <div style="padding: 20px; text-align: center; color: var(--wa-text); overflow-y: auto; flex: 1;">
+                <h3 style="color: var(--wa-green); margin-bottom: 10px;">Controle de Doações (GB)</h3>
+                <p style="font-size: 0.85rem; color: var(--wa-text-secondary); margin-bottom: 20px;">
+                    Envie o print do histórico do correio. O sistema registrará os dados em código e apagará a imagem automaticamente.
+                </p>
+                <form id="formGb" style="display: flex; flex-direction: column; gap: 12px; max-width: 300px; margin: 0 auto;">
+                    <input type="file" id="printFile" accept="image/*" required style="background: var(--wa-input-bg); padding: 10px; border-radius: 8px; color: white;" />
+                    <button type="submit" style="background: var(--wa-green); color: white; border: none; padding: 12px; border-radius: 8px; font-weight: bold; cursor: pointer;">Enviar Print para o GB</button>
+                </form>
+                <div id="gbStatus" style="margin-top: 15px; font-size: 0.9rem; color: #34d399;"></div>
+            </div>
         </div>
 
         <!-- Pop-up de Aviso -->
@@ -267,7 +283,6 @@
                 document.getElementById('userBadge').textContent = `${currentUser} (${currentRole.toUpperCase()})`;
                 document.getElementById('welcomeTitle').textContent = `Guild Chat - ${currentUser}`;
 
-                // Se não for admin, oculta ou avisa na aba de avisos
                 if (currentRole !== 'admin') {
                     document.getElementById('formGuild').style.display = 'none';
                     const li = document.createElement('li');
@@ -276,7 +291,6 @@
                     document.getElementById('messagesGuild').appendChild(li);
                 }
 
-                // Inicia conexão socket
                 socket = io();
                 socket.emit('register-user-socket', currentUser);
 
@@ -328,13 +342,15 @@
             } else if (tab === 'guild') {
                 document.querySelectorAll('.tab-btn')[1].classList.add('active');
                 document.getElementById('guildPanel').classList.add('active');
-            } else {
+            } else if (tab === 'private') {
                 document.querySelectorAll('.tab-btn')[2].classList.add('active');
                 document.getElementById('privatePanel').classList.add('active');
+            } else if (tab === 'gb') {
+                document.querySelectorAll('.tab-btn')[3].classList.add('active');
+                document.getElementById('gbPanel').classList.add('active');
             }
         }
 
-        // Envio Chat Geral
         document.getElementById('formGeneral').addEventListener('submit', (e) => {
             e.preventDefault();
             const msg = document.getElementById('inputMsgGen').value;
@@ -344,7 +360,6 @@
             }
         });
 
-        // Envio Avisos Guilda (Admin)
         document.getElementById('formGuild').addEventListener('submit', (e) => {
             e.preventDefault();
             const msg = document.getElementById('inputMsgGuild').value;
@@ -354,7 +369,6 @@
             }
         });
 
-        // Envio Mensagem Privada
         document.getElementById('formPrivate').addEventListener('submit', (e) => {
             e.preventDefault();
             const receiver = document.getElementById('selectReceiver').value;
@@ -362,6 +376,31 @@
             if (msg && receiver) {
                 socket.emit('private message', { sender: currentUser, receiver, message: msg });
                 document.getElementById('inputMsgPrivate').value = '';
+            }
+        });
+
+        document.getElementById('formGb').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const fileInput = document.getElementById('printFile');
+            const statusDiv = document.getElementById('gbStatus');
+
+            const formData = new FormData();
+            formData.append('print', fileInput.files[0]);
+            formData.append('username', currentUser);
+
+            statusDiv.textContent = "Enviando e processando print...";
+
+            const response = await fetch('/api/gb/depositar', {
+                method: 'POST',
+                body: formData
+            });
+
+            const result = await response.json();
+            if (result.success) {
+                statusDiv.textContent = "✅ " + result.message;
+                fileInput.value = '';
+            } else {
+                statusDiv.textContent = "❌ Erro ao processar o print.";
             }
         });
 
