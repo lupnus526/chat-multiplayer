@@ -3,10 +3,12 @@ const http = require('http');
 const { Server } = require('socket.io');
 const fs = require('fs');
 const path = require('path');
+const multer = require('multer');
 
 const app = express();
 const server = http.createServer(app);
 const io = new Server(server);
+const upload = multer({ dest: 'uploads/' });
 
 app.use(express.json());
 app.use(express.static(path.join(__dirname, 'public')));
@@ -42,6 +44,33 @@ app.post('/api/login', (req, res) => {
     }
 });
 
+// Rota para processar o print do Banco da Guilda (GB)
+app.post('/api/gb/depositar', upload.single('print'), (req, res) => {
+    const { username } = req.body;
+    const filePath = req.file ? req.file.path : null;
+
+    if (!filePath) {
+        return res.status(400).json({ success: false, message: 'Nenhuma imagem enviada.' });
+    }
+
+    // Registro em código dos dados do depósito
+    const registroData = {
+        membro: username,
+        data: new Date().toISOString(),
+        status: 'Registrado com sucesso via print'
+    };
+
+    const logEntry = `[${registroData.data}] Membro: ${username} enviou comprovante para o GB.\n`;
+    fs.appendFileSync(path.join(__dirname, 'gb_logs.txt'), logEntry);
+
+    // DELETA A FOTO APÓS O PROCESSAMENTO
+    fs.unlink(filePath, (err) => {
+        if (err) console.error("Erro ao deletar a foto temporária:", err);
+    });
+
+    res.json({ success: true, message: 'Print processado, registrado em código e foto apagada com sucesso!' });
+});
+
 let activeUsers = 0;
 
 io.on('connection', (socket) => {
@@ -63,13 +92,12 @@ io.on('connection', (socket) => {
 
     // Chat Privado (Estilo WhatsApp entre pessoas)
     socket.on('private message', (data) => {
-        // data = { sender, receiver, message }
         io.to(data.receiver).emit('private message', data);
-        socket.emit('private message', data); // Envia para quem mandou também espelhar
+        socket.emit('private message', data);
     });
 
     socket.on('register-user-socket', (username) => {
-        socket.join(username); // Cria uma sala específica para mensagens privadas baseada no nome
+        socket.join(username);
     });
 
     socket.on('disconnect', () => {
